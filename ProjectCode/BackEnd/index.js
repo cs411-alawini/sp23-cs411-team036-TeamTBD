@@ -15,6 +15,19 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 
+app.get("/api/get1", (require, response) => {
+    const sqlAdv1= "SELECT COUNT(GameId) AS gameCount, requiredAge FROM (SELECT * FROM GamePurchasing WHERE isFree = 'false') nonFree NATURAL JOIN Genres NATURAL JOIN GeneralGameDescrip WHERE GenreIsAction = 'true' AND PriceFinal > 0 GROUP BY requiredAge ORDER BY requiredAge"
+    db.query(sqlAdv1, (err, result) => { 
+        response.send(result);
+    });
+});
+app.get("/api/get2", (require, response) => {
+    const sqlAdv2= "SELECT GameName FROM GeneralGameDescrip NATURAL JOIN Categories NATURAL JOIN GamePurchasing WHERE CategorySinglePlayer='false' AND PriceFinal>0 AND PriceFinal<=(SELECT AVG(gp.PriceFinal) FROM GamePurchasing gp join Categories ct WHERE PriceFinal>0 AND ct.CategorySinglePlayer='false')"
+    db.query(sqlAdv2, (err, result) => { 
+        response.send(result);
+    });
+});
+    
 app.get("/api/get", (req, res) => {
     const userId = req.query.userId
     const sqlSelect = "SELECT * FROM BannedGameTitle WHERE UserId = ?";
