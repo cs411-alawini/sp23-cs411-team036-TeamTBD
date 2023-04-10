@@ -11,16 +11,13 @@ const [gameReviewList, setGameIdList] = useState([]);               //stores the
 //useState() used to INSERT game to BannedGameTitle Table
 const [addedGameTitle, setAddedGameTitle] = useState();
 
-//useState() used to DELETE game to BannedGameTitle Table
+//useState() used to DELETE game from BannedGameTitle Table
 const [deletedGameTitle, setDeletedGameTitle] = useState();
 
-// const updateGameId = (userId) => {
-//   Axios.put('http://localhost:3002/api/update', {
-//   userId: userId,
-//   gameId: newGameId
-//   });
-//   setNewGameId("")
-// };
+//useState() used to UPDATE game from BannedGameTitle Table
+const [updatedGameTitle, setUpdatedGameTitle] = useState();
+const [updatedToGameTitle, setUpdatedToGameTitle] = useState();
+
 
 const DisplayTitles = () => {
   Axios.get('http://localhost:3002/api/get/', {params: {userId: UserId}}).then((response) => {
@@ -40,6 +37,13 @@ const deleteGameId = (gameId, userId) => {
   Axios.delete(`http://localhost:3002/api/delete/${gameId}/${userId}`);
   DisplayTitles();
 };
+
+const updateGameId = (gameId, newGameId, userId) => {
+  Axios.put(`http://localhost:3002/api/update/${gameId}/${newGameId}/${userId}`);
+  DisplayTitles();
+};
+
+
 
 return (
 <div className="App">
@@ -75,6 +79,17 @@ return (
       setDeletedGameTitle(e.target.value)
       }}/>
       <button onClick={() => {deleteGameId(deletedGameTitle, UserId)}}> Delete Game </button>
+
+      {/* the view to UPDATE  */}
+      <label for="input1">GameId to update:</label>
+      <input type="text" name="updatedGameTitle" onChange={(e) => {
+      setUpdatedGameTitle(e.target.value)
+      }}/>
+      <label for="input2">New GameId:</label>
+      <input type="text" name="updatedtoGameTitle" onChange={(e) => {
+      setUpdatedToGameTitle(e.target.value)
+      }}/>
+      <button onClick={() => {updateGameId(updatedGameTitle, updatedToGameTitle, UserId)}}> Update Game </button>
   </div> 
 </div>
   );
