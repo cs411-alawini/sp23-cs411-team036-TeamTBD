@@ -50,10 +50,12 @@ app.delete("/api/delete/:gameId/:userId", (req, res) => {
     })
 });
 
-app.put("/api/update/", (req, res) => {
-    const gameId = req.body.gameId;
-    const sqlUpdate = "UPDATE `BannedGameTitle` SET `GameId` = ? WHERE `GameId`= ?";
-    db.query(sqlUpdate, [gameId, gameId], (err, result) => {
+app.put("/api/update/:gameId/:newGameId/:userId", (req, res) => {
+    const gameId = req.params.gameId
+    const newGameId = req.params.newGameId
+    const userId = req.params.userId
+    const sqlUpdate = "UPDATE `BannedGameTitle` SET `GameId` = ? WHERE `GameId`= ? AND `UserId` = ?";
+    db.query(sqlUpdate, [newGameId, gameId, userId], (err, result) => {
         if (err) {
             console.log(err);
         } else {
