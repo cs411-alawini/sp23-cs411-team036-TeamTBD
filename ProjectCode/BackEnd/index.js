@@ -20,6 +20,7 @@ app.get("/api/get1", (require, response) => {
     db.query(sqlAdv1, (err, result) => { 
         response.send(result);
     });
+    
 });
 app.get("/api/get2", (require, response) => {
     const sqlAdv2= "SELECT GameName FROM GeneralGameDescrip NATURAL JOIN Categories NATURAL JOIN GamePurchasing WHERE CategorySinglePlayer='false' AND PriceFinal>0 AND PriceFinal<=(SELECT AVG(gp.PriceFinal) FROM GamePurchasing gp join Categories ct WHERE PriceFinal>0 AND ct.CategorySinglePlayer='false')"
