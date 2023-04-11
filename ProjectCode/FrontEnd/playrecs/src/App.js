@@ -18,6 +18,24 @@ const [deletedGameTitle, setDeletedGameTitle] = useState();
 const [updatedGameTitle, setUpdatedGameTitle] = useState();
 const [updatedToGameTitle, setUpdatedToGameTitle] = useState();
 
+//advQuery 1 and 2
+const [advQueryList1, setAdvQueryList1] =useState([]);
+const [advQueryList2, setAdvQueryList2] =useState([]);
+
+const[showAdvQuery1, setShowAdvQuery1] = useState(false);
+const[showAdvQuery2, setShowAdvQuery2] = useState(false);
+useEffect(() => {
+  Axios.get('http://localhost:3002/api/get1').then((response) => {
+    setAdvQueryList1(response.data)
+  })
+},[]);
+useEffect(() => {
+  Axios.get('http://localhost:3002/api/get2').then((response) => {
+    setAdvQueryList2(response.data)
+  })
+},[]);
+
+
 
 const DisplayTitles = () => {
   Axios.get('http://localhost:3002/api/get/', {params: {userId: UserId}}).then((response) => {
@@ -44,7 +62,6 @@ const updateGameId = (gameId, newGameId, userId) => {
 };
 
 
-
 return (
 <div className="App">
   <h1>WELCOME TO PLAYRECS</h1>
@@ -67,7 +84,7 @@ return (
           );          
         })}
       </div>
-
+      
       {/* the view to INSERT  */}
       <input type="text" name="addedGameTitle" onChange={(e) => {
       setAddedGameTitle(e.target.value)
@@ -90,6 +107,43 @@ return (
       setUpdatedToGameTitle(e.target.value)
       }}/>
       <button onClick={() => {updateGameId(updatedGameTitle, updatedToGameTitle, UserId)}}> Update Game </button>
+      <div>
+        <button onClick = {() => {setShowAdvQuery2(!showAdvQuery2)}}>   Display advanced query2</button>
+        {showAdvQuery2? <div>
+          <p>Query: </p>
+          <p>SELECT GameName FROM GeneralGameDescrip NATURAL JOIN Categories NATURAL JOIN GamePurchasing </p>
+          <p> WHERE CategorySinglePlayer='false' AND PriceFinal&gt;0 AND PriceFinal&lt;=</p>
+          <p>&emsp;(SELECT AVG(gp.PriceFinal) FROM GamePurchasing gp join Categories ct WHERE PriceFinal&gt;0 AND ct.CategorySinglePlayer='false')</p>
+          {advQueryList2.map((val) => {
+          return (
+            <div className = "advQuery2">
+              <p>Game Name: {val.GameName}</p>
+            </div>
+          );          
+        })}</div>:null}
+      </div>
+      <div>
+       <button onClick = {() => {setShowAdvQuery1(!showAdvQuery1)}}>   Display advanced query1</button>
+       {showAdvQuery1? <div>
+        <p>Query:</p>
+        <p> SELECT COUNT(GameId) AS gameCount, requiredAge </p>
+        <p>FROM (SELECT * FROM GamePurchasing WHERE isFree = 'false') nonFree NATURAL JOIN Genres NATURAL JOIN GeneralGameDescrip</p>
+        <p>WHERE GenreIsAction = 'true' AND PriceFinal &gt; 0 </p>
+        <p>GROUP BY requiredAge </p>
+        <p>ORDER BY requiredAge</p>
+        {advQueryList1.map((val) => {
+         return (
+           <div className = "advQuery1">
+             <p>Required Age: {val.requiredAge}</p>
+             <p>Count: {val.gameCount}</p>
+           </div>
+         );          
+       })}</div>:null}
+     </div>
+      
+      
+      
+      
   </div> 
 </div>
   );
