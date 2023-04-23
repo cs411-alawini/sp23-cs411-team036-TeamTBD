@@ -24,6 +24,47 @@ const [advQueryList2, setAdvQueryList2] =useState([]);
 
 const[showAdvQuery1, setShowAdvQuery1] = useState(false);
 const[showAdvQuery2, setShowAdvQuery2] = useState(false);
+
+
+//const numGenreCollections = 18;
+const GenreCategories = ["GenreIsIndie","GenreIsAction","GenreIsAdventure","GenreIsCasual",
+"GenreIsStrategy","GenreIsRPG","GenreIsSimulation","GenreIsEarlyAccess","GenreIsFreeToPlay",
+"GenreIsSports","GenreIsRacing","GenreIsMassivelyMultiplayer","CategorySinglePlayer","CategoryMultiplayer",
+"CategoryCoop","CategoryMMO","CategoryInAppPurchase","CategoryIsNonGame"];
+const[checked, setChecked]=useState(new Array(GenreCategories.length).fill(false));
+const[sqlToInsert, setSqlToInsert] = useState('');
+const[filteredGameList, setFilteredGameList] = useState([]);
+
+const SearchFilter = () => {
+  Axios.get('http://localhost:3002/api/getFilter/', {params: {sqlToInsert: sqlToInsert}}).then((response) => {
+    setFilteredGameList(response.data)
+  });
+}
+//When search button clicked, create SQL string and call SearchFilter
+const Search = () => {
+  var sqlLine = "";
+  for(var i = 0; i < GenreCategories.length; i++) {
+    if(checked[i]===true) {
+      if(sqlLine.length === 0) {
+        sqlLine+=GenreCategories[i]+"='true'";
+      } else {
+        sqlLine+=" AND "+GenreCategories[i]+"='true'";
+      }
+    }
+  }
+  var sqlFinal = "SELECT GameName FROM GeneralGameDescrip NATURAL JOIN Categories NATURAL JOIN Genres WHERE ";
+  sqlFinal+=sqlLine;
+  setSqlToInsert(sqlFinal);
+  SearchFilter();
+}
+//when checked box
+const handleOnChange = (position) => {
+  const updatedChecked = checked.map((item,index) =>
+    index === position ? !item : item
+  );
+  setChecked(updatedChecked);
+};
+
 useEffect(() => {
   Axios.get('http://localhost:3002/api/get1').then((response) => {
     setAdvQueryList1(response.data)
@@ -107,6 +148,7 @@ return (
       setUpdatedToGameTitle(e.target.value)
       }}/>
       <button onClick={() => {updateGameId(updatedGameTitle, updatedToGameTitle, UserId)}}> Update Game </button>
+
       <div>
         <button onClick = {() => {setShowAdvQuery2(!showAdvQuery2)}}>   Display advanced query2</button>
         {showAdvQuery2? <div>
@@ -139,11 +181,36 @@ return (
            </div>
          );          
        })}</div>:null}
+            <div>
+        {GenreCategories.map((name, index) => {
+          return(
+            <li>
+              <input
+                type = "checkbox"
+                id = {`box${index}`}
+                checkedBox={checked[index]}
+                onChange={()=>handleOnChange(index)} 
+              />
+              <label htmlFor={`box${index}`}>{name}</label>
+            </li>
+          );
+        })}
+        <li>
+          <button onClick={()=>Search()}>Search</button>
+        </li>
+        <p>SQL: {sqlToInsert}</p>
+    </div>
      </div>
-      
-      
-      
-      
+     <div>
+       <h1>Filtered Game List </h1>
+       {filteredGameList.map((val) => {
+         return (
+           <div className = "card">
+             <p>Game Name:{val.GameName}</p>
+           </div>
+         );          
+       })}
+   </div>     
   </div> 
 </div>
   );
