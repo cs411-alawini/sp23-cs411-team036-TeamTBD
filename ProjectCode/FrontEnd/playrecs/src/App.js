@@ -42,6 +42,9 @@ const[showProfile, setShowProfile] = useState(false);
 const[showPlatform, setShowPlatform] = useState(false);
 
 const[userAge,setUserAge] = useState(0);
+
+// const[age,setAge] = useState(0);
+
 const numGenreCollections = 18;
 const GenreCategories = ["GenreIsIndie","GenreIsAction","GenreIsAdventure","GenreIsCasual",
 "GenreIsStrategy","GenreIsRPG","GenreIsSimulation","GenreIsEarlyAccess","GenreIsFreeToPlay",
@@ -94,7 +97,11 @@ const Search = () => {
   }
   var agetext = JSON.stringify(userAge);
   agetext = agetext.match(/\d+/);
+
+  // age = parseInt(agetext);
+  // setAge(age);
   //age = parseInt(agetext);
+
   if(checked[19]===true){
     if(sqlLine.length === 0) {
       sqlLine+=agetext+">=RequiredAge";
@@ -166,14 +173,9 @@ const userLogin = () => {
     Axios.post('http://localhost:3002/api/insertUser', {
       userId: UserId
     });
-    userData.map((val) => {
-      setUpdateFN(val.FirstName);
-      setUpdateLN(val.LastName);
-      setUpdatePN(val.PhoneNumber);
-      setUpdateE(val.EmailAddress);
-    })
     DisplayTitles()
 }
+
 const updateAll = () => {
   userData.map((val) => {
     setUpdateFN(val.FirstName);
@@ -182,6 +184,7 @@ const updateAll = () => {
     setUpdateE(val.EmailAddress);
   })
 }
+
 const updateUserInfo = (userId, FirstName, LastName, PhoneNumber, EmailAddress) => {
   Axios.put(`http://localhost:3002/api/updateUser/${userId}/${FirstName}/${LastName}/${PhoneNumber}/${EmailAddress}`).then(DisplayUserData());
 };
@@ -208,7 +211,9 @@ return (
         <div>
           <p> Welcome User: {UserId}</p>
           <p>Choose to Update Profile or Search for Games</p>
-          <button onClick = {() => {updateAll();setShowProfile(!showProfile)}}> Update Profile</button>
+
+          <button onClick = {() => {updateAll(); setShowProfile(!showProfile)}}> Update Profile</button>
+
           {showProfile? 
           <div>
             <p>Updating Profile</p>
