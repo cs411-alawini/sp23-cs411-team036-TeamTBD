@@ -153,7 +153,6 @@ const InsertTitles = () => {
 
 const deleteGameId = (gameId, userId) => {
   Axios.delete(`http://localhost:3002/api/delete/${gameId}/${userId}`).then(DisplayTitles());
-  Axios.delete(`http://localhost:3002/api/delete/${gameId}/${userId}`).then(DisplayTitles());
 };
 
 // const updateGameId = (gameId, newGameId, userId) => {
