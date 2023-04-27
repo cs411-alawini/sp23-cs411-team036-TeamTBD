@@ -130,7 +130,15 @@ useEffect(() => {
     setAdvQueryList2(response.data)
   })
 },[]);
-
+const DisplayBannedGames = () => {
+  return gameReviewList.map((val) => {
+    return (
+      <div className = "card">
+        <p>Game Id:{val.GameId}</p>
+      </div>
+    );          
+  })
+}
 const DisplayTitles = () => {
   Axios.get('http://localhost:3002/api/get/', {params: {userId: UserId}}).then((response) => {
     setGameIdList(response.data)
@@ -240,13 +248,7 @@ return (
             {/* the view for displaying the "banned games" for typed user */}
             <div>
               <p>Update Banned Games Titles </p>
-              {gameReviewList.map((val) => {
-                return (
-                  <div className = "card">
-                    <p>Game Id:{val.GameId}</p>
-                  </div>
-                );          
-              })}
+              {DisplayBannedGames()}
 
               {/* the view to INSERT  */}
               <input type="text" name="addedGameTitle" onChange={(e) => {
