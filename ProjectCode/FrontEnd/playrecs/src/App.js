@@ -25,12 +25,12 @@ const [advQueryList2, setAdvQueryList2] =useState([]);
 const[showAdvQuery1, setShowAdvQuery1] = useState(false);
 const[showAdvQuery2, setShowAdvQuery2] = useState(false);
 
-//const numGenreCollections = 18;
+const numGenreCollections = 18;
 const GenreCategories = ["GenreIsIndie","GenreIsAction","GenreIsAdventure","GenreIsCasual",
 "GenreIsStrategy","GenreIsRPG","GenreIsSimulation","GenreIsEarlyAccess","GenreIsFreeToPlay",
 "GenreIsSports","GenreIsRacing","GenreIsMassivelyMultiplayer","CategorySinglePlayer","CategoryMultiplayer",
-"CategoryCoop","CategoryMMO","CategoryInAppPurchase","CategoryIsNonGame"];
-const[checked, setChecked]=useState(new Array(GenreCategories.length+2).fill(false));
+"CategoryCoop","CategoryMMO","CategoryInAppPurchase","CategoryIsNonGame","BannedGames","UserAge"];
+const[checked, setChecked]=useState(new Array(GenreCategories.length).fill(false));
 const[sqlToInsert, setSqlToInsert] = useState('');
 const[filteredGameList, setFilteredGameList] = useState([]);
 const[searchText, setSearchText]=useState('');
@@ -42,7 +42,7 @@ const SearchFilter = () => {
 //When search button clicked, create SQL string and call SearchFilter
 const Search = () => {
   var sqlLine = "";
-  for(var i = 0; i < GenreCategories.length; i++) {
+  for(var i = 0; i < numGenreCollections; i++) {
     if(checked[i]===true) {
       if(sqlLine.length === 0) {
         sqlLine+=GenreCategories[i]+"='true'";
@@ -59,7 +59,21 @@ const Search = () => {
   } else {
     sqlLine+=" AND "+"GameName LIKE '%"+searchText+"%'";
   }
-  var sqlFinal = "SELECT GameName FROM GeneralGameDescrip NATURAL JOIN Categories NATURAL JOIN Genres WHERE ";
+ //banned game list
+ if(checked[18]===true){
+
+  for(var i = 0; i < gameReviewList.length; i++) {
+    if(sqlLine.length === 0) {
+      sqlLine+="GameId <>" +gameReviewList[i].GameId;
+    } else {
+      sqlLine+=" AND GameId <>"+gameReviewList[i].GameId;
+    }
+  }
+}
+  var sqlFinal = "SELECT GameName, GameId FROM GeneralGameDescrip NATURAL JOIN Categories NATURAL JOIN Genres WHERE ";
+  if(sqlLine.length===0){
+    sqlFinal="SELECT GameName, GameId FROM GeneralGameDescrip NATURAL JOIN Categories NATURAL JOIN Genres";
+  }
   sqlFinal+=sqlLine;
   setSqlToInsert(sqlFinal);
   SearchFilter();
@@ -215,13 +229,6 @@ return (
         <div>
         <h1>Filtered Game List </h1>
           
-        {filteredGameList.map((val) => {
-         return (
-           <div className = "card">
-             <p>Game Name:{val.GameName}</p>
-           </div>
-         );          
-        })}
     </div>   
         <p>SQL: {sqlToInsert}</p>
         <p>{JSON.stringify(filteredGameList)}</p>
