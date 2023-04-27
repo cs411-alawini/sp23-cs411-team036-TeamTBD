@@ -227,7 +227,14 @@ return (
         </li>
         <div>
         <h1>Filtered Game List </h1>
-          
+        {filteredGameList.map((val) => {
+    return (
+      <div className = "card">
+        <p>Game Name:{val.GameName}</p>
+        <p>Game Id:{val.GameId}</p>
+      </div>
+    );          
+   })}
     </div>   
         <p>SQL: {sqlToInsert}</p>
         <p>{JSON.stringify(filteredGameList)}</p>
