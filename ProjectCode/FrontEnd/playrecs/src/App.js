@@ -31,10 +31,10 @@ const GenreCategories = ["GenreIsIndie","GenreIsAction","GenreIsAdventure","Genr
 "GenreIsStrategy","GenreIsRPG","GenreIsSimulation","GenreIsEarlyAccess","GenreIsFreeToPlay",
 "GenreIsSports","GenreIsRacing","GenreIsMassivelyMultiplayer","CategorySinglePlayer","CategoryMultiplayer",
 "CategoryCoop","CategoryMMO","CategoryInAppPurchase","CategoryIsNonGame"];
-const[checked, setChecked]=useState(new Array(GenreCategories.length).fill(false));
+const[checked, setChecked]=useState(new Array(GenreCategories.length+2).fill(false));
 const[sqlToInsert, setSqlToInsert] = useState('');
 const[filteredGameList, setFilteredGameList] = useState([]);
-
+const[searchText, setSearchText]=useState('');
 const SearchFilter = () => {
   Axios.get('http://localhost:3002/api/getFilter/', {params: {sqlToInsert: sqlToInsert}}).then((response) => {
     setFilteredGameList(response.data)
@@ -51,6 +51,12 @@ const Search = () => {
         sqlLine+=" AND "+GenreCategories[i]+"='true'";
       }
     }
+  }
+  //user text includes text = "" for empty so can keep WHERE in sqlFinal
+  if(sqlLine.length === 0) {
+    sqlLine+="GameName LIKE %"+searchText+"%";
+  } else {
+    sqlLine+=" AND "+"GameName LIKE %"+searchText+"%";
   }
   var sqlFinal = "SELECT GameName FROM GeneralGameDescrip NATURAL JOIN Categories NATURAL JOIN Genres WHERE ";
   sqlFinal+=sqlLine;
@@ -181,7 +187,13 @@ return (
            </div>
          );          
        })}</div>:null}
-            <div>
+      <div>
+        <input type="text" name="searchTextBox" onChange={(e) => {
+          setSearchText(e.target.value)
+        }}/>
+        <p>{searchText}</p>
+      </div>
+      <div>
         {GenreCategories.map((name, index) => {
           return(
             <li>
@@ -196,21 +208,32 @@ return (
           );
         })}
         <li>
-          <button onClick={()=>Search()}>Search</button>
+          <button onClick={()=>{Search()}}>Search</button>
         </li>
+        <div>
+        <h1>Filtered Game List </h1>
+        {filteredGameList.map((val) => {
+          return (
+            <div className = "card">
+              <p>Game Name:{val.GameName}</p>
+            </div>
+          );          
+        })}
+    </div>   
         <p>SQL: {sqlToInsert}</p>
+        <p>{JSON.stringify(filteredGameList)}</p>
     </div>
      </div>
-     <div>
-       <h1>Filtered Game List </h1>
-       {filteredGameList.map((val) => {
-         return (
-           <div className = "card">
-             <p>Game Name:{val.GameName}</p>
-           </div>
-         );          
-       })}
-   </div>     
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
   </div> 
 </div>
   );

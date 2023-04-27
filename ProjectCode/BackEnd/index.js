@@ -20,9 +20,10 @@ app.get("/api/getFilter", (req, res) => {
     //const userId = req.body.userId
     //SQL written in front end
     const sqlSelect =  req.query.sqlToInsert;
+    console.log("test");
     db.query(sqlSelect, (err, result) => {
         res.send(result);
-        console.log(result);
+        console.log("test");
     });
 });
 
