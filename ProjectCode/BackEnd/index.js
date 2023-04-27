@@ -9,7 +9,8 @@ var db = mysql.createConnection({
   user: "root",
   password: "test1234",
   database: "Game_Data",
-})
+});
+  
 
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -90,6 +91,23 @@ app.put("/api/update/:gameId/:newGameId/:userId", (req, res) => {
     })
 });
 
+app.get("/api/storeprocedure", (req, res) => {
+
+    const query = `call Game_Data.game_stats3()`;
+    db.query(query, (err, sqldata) => {
+        if (err) console.log(err);
+        else res.status(200).json({message: "OK", sqldata});
+    });
+});
+
 app.listen(3002, () => {
     console.log("running on port 3002");
 })
+
+db.connect(function(err) {
+    if (err) {
+      console.log("Fail to connect to db");
+      return;
+    }
+    console.log("Connected to db");
+});

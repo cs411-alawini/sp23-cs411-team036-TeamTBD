@@ -1,6 +1,7 @@
 import './App.css';
 import React, {useState, useEffect} from "react";
 import Axios from 'axios';
+import StoreprocedureTable from './StoredprocedureTable';
 
 function App() {
 
@@ -239,7 +240,11 @@ return (
         <p>SQL: {sqlToInsert}</p>
         <p>{JSON.stringify(filteredGameList)}</p>
     </div>
-    </div> 
+    </div>
+
+    <div className='storeprocedure'>
+      <StoreprocedureTable />
+    </div>
   </div>
     );
   }
