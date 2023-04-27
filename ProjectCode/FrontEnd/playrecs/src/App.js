@@ -53,6 +53,12 @@ const SearchFilter = (sqlText) => {
     setFilteredGameList(response.data)
   });
 }
+// Stored Proecdure stuff
+const [showCode, setShowCode] = useState(false);
+
+  const toggleCode = () => {
+    setShowCode(!showCode);
+  };
 //When search button clicked, create SQL string and call SearchFilter
 const Search = () => {
   var sqlLine = "";
@@ -326,9 +332,15 @@ return (
         <p>{JSON.stringify(filteredGameList)}</p> 
         <p>user Age: {JSON.stringify(userAge)}</p>*/}
     </div>
-    <div className='storeprocedure'>
-      <StoreprocedureTable />
+    <div>
+      <button onClick={toggleCode}>View Steam Game Statistics </button>
+      {showCode && (
+        <div className='storeprocedure'>
+          <StoreprocedureTable />
+        </div>
+      )}
     </div>
+    
   </div>
   
   );
