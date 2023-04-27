@@ -38,6 +38,7 @@ const[showAdvQuery2, setShowAdvQuery2] = useState(false);
 const[showProfile, setShowProfile] = useState(false);
 const[showPlatform, setShowPlatform] = useState(false);
 
+const[userAge,setUserAge] = useState(0);
 const numGenreCollections = 18;
 const GenreCategories = ["GenreIsIndie","GenreIsAction","GenreIsAdventure","GenreIsCasual",
 "GenreIsStrategy","GenreIsRPG","GenreIsSimulation","GenreIsEarlyAccess","GenreIsFreeToPlay",
@@ -82,6 +83,16 @@ const Search = () => {
       }
     }
   }
+  var agetext = JSON.stringify(userAge);
+  agetext = agetext.match(/\d+/);
+  //age = parseInt(agetext);
+  if(checked[19]===true){
+    if(sqlLine.length === 0) {
+      sqlLine+=agetext+">=RequiredAge";
+    } else {
+      sqlLine+=" AND "+agetext+">=RequiredAge";
+    }
+  }
   var sqlFinal = "SELECT GameName, GameId FROM GeneralGameDescrip NATURAL JOIN Categories NATURAL JOIN Genres WHERE ";
   if(sqlLine.length===0){
     sqlFinal="SELECT GameName, GameId FROM GeneralGameDescrip NATURAL JOIN Categories NATURAL JOIN Genres";
@@ -89,6 +100,11 @@ const Search = () => {
   sqlFinal+=sqlLine;
   setSqlToInsert(sqlFinal);
   SearchFilter(sqlFinal);
+}
+const getUserAge = () => {
+  Axios.get('http://localhost:3002/api/getAge/', {params: {userId: UserId}}).then((response) => {
+    setUserAge(response.data)
+  });
 }
 //when checked box
 const handleOnChange = (position) => {
@@ -112,6 +128,7 @@ useEffect(() => {
 const DisplayTitles = () => {
   Axios.get('http://localhost:3002/api/get/', {params: {userId: UserId}}).then((response) => {
     setGameIdList(response.data)
+    getUserAge()
   });
 }
 
@@ -275,7 +292,7 @@ return (
     <input type="text" name="searchTextBox" onChange={(e) => {
           setSearchText(e.target.value)
     }}/>
-    <p>{searchText}</p>
+    {/* <p>{searchText}</p> */}
   </div>
   <div>
         {GenreCategories.map((name, index) => {
@@ -306,7 +323,8 @@ return (
    })}
     </div>   
         {/* <p>SQL: {sqlToInsert}</p>
-        <p>{JSON.stringify(filteredGameList)}</p> */}
+        <p>{JSON.stringify(filteredGameList)}</p> 
+        <p>user Age: {JSON.stringify(userAge)}</p>*/}
     </div>
     <div className='storeprocedure'>
       <StoreprocedureTable />
