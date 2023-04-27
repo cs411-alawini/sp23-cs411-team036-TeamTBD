@@ -6,8 +6,17 @@ import StoreprocedureTable from './StoredprocedureTable';
 function App() {
 
 //useState() used to display banned game titles
-const [UserId, setUserId] = useState();                             //stores current UserId
-const [gameReviewList, setGameIdList] = useState([]);               //stores the data returned from the query in .get() function
+//login information 
+const [UserId, setUserId] = useState();                            //stores current UserId
+
+//userState() used to store data from updating profile
+const [updateFN, setUpdateFN] = useState();                     //stores current FirstName
+const [updateLN, setUpdateLN] = useState();                     //stores current LastName
+const [updatePN, setUpdatePN] = useState();                     //stores current FirstName
+const [updateE, setUpdateE] = useState();                       //stores current LastName
+
+const [gameReviewList, setGameIdList] = useState([]);             //stores the data returned from the query in .get() function
+const [userData, setUserData] = useState([]);             //stores the data returned from the query in .get() function
 
 //useState() used to INSERT game to BannedGameTitle Table
 const [addedGameTitle, setAddedGameTitle] = useState();
@@ -16,15 +25,18 @@ const [addedGameTitle, setAddedGameTitle] = useState();
 const [deletedGameTitle, setDeletedGameTitle] = useState();
 
 //useState() used to UPDATE game from BannedGameTitle Table
-const [updatedGameTitle, setUpdatedGameTitle] = useState();
-const [updatedToGameTitle, setUpdatedToGameTitle] = useState();
+// const [updatedGameTitle, setUpdatedGameTitle] = useState();
+// const [updatedToGameTitle, setUpdatedToGameTitle] = useState();
 
 //advQuery 1 and 2
 const [advQueryList1, setAdvQueryList1] =useState([]);
 const [advQueryList2, setAdvQueryList2] =useState([]);
 
+//useState() used to display data after pressing buttons
 const[showAdvQuery1, setShowAdvQuery1] = useState(false);
 const[showAdvQuery2, setShowAdvQuery2] = useState(false);
+const[showProfile, setShowProfile] = useState(false);
+const[showPlatform, setShowPlatform] = useState(false);
 
 const numGenreCollections = 18;
 const GenreCategories = ["GenreIsIndie","GenreIsAction","GenreIsAdventure","GenreIsCasual",
@@ -97,12 +109,15 @@ useEffect(() => {
   })
 },[]);
 
-
-
-
 const DisplayTitles = () => {
   Axios.get('http://localhost:3002/api/get/', {params: {userId: UserId}}).then((response) => {
     setGameIdList(response.data)
+  });
+}
+
+const DisplayUserData = () => {
+  Axios.get('http://localhost:3002/api/getUserData/', {params: {userId: UserId}}).then((response) => {
+    setUserData(response.data)
   });
 }
 
@@ -110,106 +125,159 @@ const InsertTitles = () => {
   Axios.post('http://localhost:3002/api/insert', {
   userId: UserId,
   gameId: addedGameTitle
-  }).then(DisplayTitles()); 
+  }).then(DisplayTitles());
 }
 
 const deleteGameId = (gameId, userId) => {
   Axios.delete(`http://localhost:3002/api/delete/${gameId}/${userId}`).then(DisplayTitles());
+  Axios.delete(`http://localhost:3002/api/delete/${gameId}/${userId}`).then(DisplayTitles());
 };
 
-const updateGameId = (gameId, newGameId, userId) => {
-  Axios.put(`http://localhost:3002/api/update/${gameId}/${newGameId}/${userId}`).then(DisplayTitles());
+// const updateGameId = (gameId, newGameId, userId) => {
+//   Axios.put(`http://localhost:3002/api/update/${gameId}/${newGameId}/${userId}`).then(DisplayTitles());
+// };
+
+const userLogin = () => {
+  Axios.get('http://localhost:3002/api/getUserData/', {params: {userId: UserId}}).then((response) => {
+    setUserData(response.data)
+    });
+
+    Axios.post('http://localhost:3002/api/insertUser', {
+      userId: UserId
+    });
+    userData.map((val) => {
+      setUpdateFN(val.FirstName);
+      setUpdateLN(val.LastName);
+      setUpdatePN(val.PhoneNumber);
+      setUpdateE(val.EmailAddress);
+    })
+    DisplayTitles()
+}
+
+const updateUserInfo = (userId, FirstName, LastName, PhoneNumber, EmailAddress) => {
+  Axios.put(`http://localhost:3002/api/updateUser/${userId}/${FirstName}/${LastName}/${PhoneNumber}/${EmailAddress}`).then(DisplayUserData());
 };
 
 return (
   <div className="App">
-    <h1>WELCOME TO PLAYRECS</h1>
-    <label>Type your UserId to display User Data</label>
-    <div className="form">
-      <label> User Id:</label>
-      <input type="text" name="UserId" onChange={(e) => {
-        setUserId(e.target.value)
-      }}/>
-      <button onClick={DisplayTitles}> Submit </button>
-  
-        {/* the view for displaying the "banned games" for typed user */}
+  <h1>WELCOME TO PLAYRECS</h1>
+  <label>Login/Signup by Typing UserId and Password!</label>
+  <div className="form">
+    <label> User Id:</label>
+    <input type="text" name="UserId" onChange={(e) => {
+      setUserId(e.target.value)
+    }}/>
+    <label> Password: </label>
+    <input type="password" name="Password"/>
+    <button onClick={() => {userLogin(); setShowPlatform(!showPlatform)}}> Login </button>
+    <div>
+        {/* View to display updating profile properties for the user to make changes to account */}
+        {showPlatform?
         <div>
-          <h1>Banned Games Titles </h1>
-          {gameReviewList.map((val) => {
-            return (
-              <div className = "card">
-                <p>Game Id:{val.GameId}</p>
-              </div>
-            );          
-          })}
-        </div>
+          <p> Welcome User: {UserId}</p>
+          <p>Choose to Update Profile or Search for Games</p>
+          <button onClick = {() => {setShowProfile(!showProfile)}}> Update Profile</button>
+          {showProfile? 
+          <div>
+            <p>Updating Profile</p>
+            {userData.map((val) => {
+                return (
+                  <div className = "card">
+                    <p>First Name: {val.FirstName}</p>
+                    <p>Last Name: {val.LastName}</p>
+                    <p>Phone Number: {val.PhoneNumber}</p>
+                    <p>Email: {val.EmailAddress}</p>
+                  </div>
+                );          
+              })}
+            {/* Text Field to store FirstName */}
+            <label> First Name: </label>
+            <input type="text" name="FirstName" onChange={(e) => {
+              setUpdateFN(e.target.value)
+            }}/>
+
+            {/* Text Field to store LastName */}
+            <label> Last Name: </label>
+            <input type="text" name="LastName" onChange={(e) => {
+              setUpdateLN(e.target.value)
+            }}/>
+
+            {/* Text Field to store PhoneNumber */}
+            <label> Phone Number: </label>
+            <input type="text" name="PhoneNumber" onChange={(e) => {
+              setUpdatePN(e.target.value)
+            }}/>
+
+            {/* Text Field to store Email */}
+            <label> Email Address:</label>
+            <input type="text" name="Email" onChange={(e) => {
+              setUpdateE(e.target.value)
+            }}/>
+            <button onClick={() => {updateUserInfo(UserId, updateFN, updateLN, updatePN, updateE)}}> Update </button>
+
+            {/* the view for displaying the "banned games" for typed user */}
+            <div>
+              <p>Update Banned Games Titles </p>
+              {gameReviewList.map((val) => {
+                return (
+                  <div className = "card">
+                    <p>Game Id:{val.GameId}</p>
+                  </div>
+                );          
+              })}
+
+              {/* the view to INSERT  */}
+              <input type="text" name="addedGameTitle" onChange={(e) => {
+                setAddedGameTitle(e.target.value)
+              }}/>
+              <button onClick={InsertTitles}> Add Game </button>
+
+              {/* the view to DELETE  */}
+              <input type="text" name="deletedGameTitle" onChange={(e) => {
+                setDeletedGameTitle(e.target.value)
+              }}/>
+              <button onClick={() => {deleteGameId(deletedGameTitle, UserId)}}> Delete Game </button>
+            </div>
+
+          </div>:null}
+        </div>:null}
+    </div>
+
+      <div>
+        <button onClick = {() => {setShowAdvQuery2(!showAdvQuery2)}}>   Multiplayer Games</button>
+        {showAdvQuery2? <div>
+          <p>Multiplayer games less than or equal to average price of all non-free multiplayer games:  </p>
+          {advQueryList2.map((val) => {
+          return (
+            <div className = "advQuery2">
+              <p>Game Name: {val.GameName}</p>
+            </div>
+          );          
+        })}</div>:null}
         
-        {/* the view to INSERT  */}
-        <input type="text" name="addedGameTitle" onChange={(e) => {
-        setAddedGameTitle(e.target.value)
-        }}/>
-        <button onClick={InsertTitles}> Add Game </button>
-  
-        {/* the view to DELETE  */}
-        <input type="text" name="deletedGameTitle" onChange={(e) => {
-        setDeletedGameTitle(e.target.value)
-        }}/>
-        <button onClick={() => {deleteGameId(deletedGameTitle, UserId)}}> Delete Game </button>
-  
-        <div>
-          {/* the view to UPDATE  */}
-          <label for="input1">GameId to update:</label>
-          <input type="text" name="updatedGameTitle" onChange={(e) => {
-          setUpdatedGameTitle(e.target.value)
-          }}/>
-          <label for="input2">New GameId:</label>
-          <input type="text" name="updatedtoGameTitle" onChange={(e) => {
-          setUpdatedToGameTitle(e.target.value)
-          }}/>
-          <button onClick={() => {updateGameId(updatedGameTitle, updatedToGameTitle, UserId)}}> Update Game </button>
-        </div>
-  
-        <div>
-          <button onClick = {() => {setShowAdvQuery2(!showAdvQuery2)}}>   Multiplayer Games</button>
-          {showAdvQuery2? <div>
-            <p>Multiplayer games less than or equal to average price of all non-free multiplayer games:  </p>
-            {/* <p>SELECT GameName FROM GeneralGameDescrip NATURAL JOIN Categories NATURAL JOIN GamePurchasing </p>
-            <p> WHERE CategorySinglePlayer='false' AND PriceFinal&gt;0 AND PriceFinal&lt;=</p>
-            <p>&emsp;(SELECT AVG(gp.PriceFinal) FROM GamePurchasing gp join Categories ct WHERE PriceFinal&gt;0 AND ct.CategorySinglePlayer='false')</p> */}
-            {advQueryList2.map((val) => {
-            return (
-              <div className = "advQuery2">
-                <p>Game Name: {val.GameName}</p>
-              </div>
-            );          
-          })}</div>:null}
-          
-        </div>
-        <div>
-         <button onClick = {() => {setShowAdvQuery1(!showAdvQuery1)}}>   Non-free Action Games</button>
-         {showAdvQuery1? <div>
-          <p>Number of non-free Action Games based on Age:</p>
-          {/* <p> SELECT COUNT(GameId) AS gameCount, requiredAge </p>
-          <p>FROM (SELECT * FROM GamePurchasing WHERE isFree = 'false') nonFree NATURAL JOIN Genres NATURAL JOIN GeneralGameDescrip</p>
-          <p>WHERE GenreIsAction = 'true' AND PriceFinal &gt; 0 </p>
-          <p>GROUP BY requiredAge </p>
-          <p>ORDER BY requiredAge</p> */}
-          {advQueryList1.map((val) => {
-           return (
-             <div className = "advQuery1">
-               <p>Required Age: {val.requiredAge}</p>
-               <p>Count: {val.gameCount}</p>
-             </div>
-           );          
-         })}</div>:null}
-       </div>
-       <div>
-        <input type="text" name="searchTextBox" onChange={(e) => {
-          setSearchText(e.target.value)
-        }}/>
-        <p>{searchText}</p>
       </div>
       <div>
+       <button onClick = {() => {setShowAdvQuery1(!showAdvQuery1)}}>   Non-free Action Games</button>
+       {showAdvQuery1? <div>
+        <p>Number of non-free Action Games based on Age:</p>
+        {advQueryList1.map((val) => {
+         return (
+           <div className = "advQuery1">
+             <p>Required Age: {val.requiredAge}</p>
+             <p>Count: {val.gameCount}</p>
+           </div>
+         );          
+       })}</div>:null}
+     </div>
+  </div> 
+
+  <div>
+    <input type="text" name="searchTextBox" onChange={(e) => {
+          setSearchText(e.target.value)
+    }}/>
+    <p>{searchText}</p>
+  </div>
+  <div>
         {GenreCategories.map((name, index) => {
           return(
             <li>
@@ -237,16 +305,15 @@ return (
     );          
    })}
     </div>   
-        <p>SQL: {sqlToInsert}</p>
-        <p>{JSON.stringify(filteredGameList)}</p>
+        {/* <p>SQL: {sqlToInsert}</p>
+        <p>{JSON.stringify(filteredGameList)}</p> */}
     </div>
-    </div>
-
     <div className='storeprocedure'>
       <StoreprocedureTable />
     </div>
   </div>
-    );
-  }
+  
+  );
+}
   
   export default App;
