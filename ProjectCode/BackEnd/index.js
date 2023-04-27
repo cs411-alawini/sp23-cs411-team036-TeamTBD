@@ -41,6 +41,15 @@ app.get("/api/get2", (require, response) => {
         response.send(result);
     });
 });
+
+app.get("/api/getUserData", (req, res) => {
+    const userId = req.query.userId
+    const sqlSelect = "SELECT * FROM LoginUser WHERE UserId = ?";
+    db.query(sqlSelect, [userId], (err, result) => {
+        res.send(result);
+        console.log(result);
+    });
+});
     
 app.get("/api/get", (req, res) => {
     const userId = req.query.userId
@@ -56,6 +65,18 @@ app.post("/api/insert", (req, res) => {
     const gameId = req.body.gameId;
     const sqlInsert = "INSERT INTO `BannedGameTitle` (`UserId`, `GameId`) VALUES (?,?)";
     db.query(sqlInsert, [userId, gameId], (err, result) => {
+        if (err) {
+            console.log(err);
+        } else {
+            console.log("1 record inserted");
+        }
+    })
+});
+
+app.post("/api/insertUser", (req, res) => {
+    const userId = req.body.userId;
+    const sqlInsert = "INSERT INTO `LoginUser` (`UserId`) VALUES (?)";
+    db.query(sqlInsert, [userId], (err, result) => {
         if (err) {
             console.log(err);
         } else {
@@ -100,6 +121,21 @@ app.get("/api/storeprocedure", (req, res) => {
     });
 });
 
+app.put("/api/updateUser/:userId/:firstName/:lastName/:phoneNum/:email", (req, res) => {
+    const userId = req.params.userId
+    const firstName = req.params.firstName
+    const lastName = req.params.lastName
+    const phoneNum = req.params.phoneNum
+    const email = req.params.email
+    const sqlUpdate = "UPDATE `LoginUser` SET `FirstName` = ?, `LastName` = ?, `PhoneNumber` = ?, `EmailAddress` = ? WHERE `UserId` = ?;";
+    db.query(sqlUpdate, [firstName, lastName, phoneNum, email, userId], (err, result) => {
+        if (err) {
+            console.log(err);
+        } else {
+            console.log("1 record updated");
+        }
+    })
+});
 app.listen(3002, () => {
     console.log("running on port 3002");
 })
