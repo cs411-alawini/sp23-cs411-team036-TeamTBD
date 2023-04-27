@@ -15,6 +15,18 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 
+
+//filter
+app.get("/api/getFilter", (req, res) => {
+    //const userId = req.body.userId
+    //SQL written in front end
+    const sqlSelect =  req.query.sqlToInsert;
+    db.query(sqlSelect, (err, result) => {
+        res.send(result);
+        console.log(result);
+    });
+});
+
 app.get("/api/get1", (require, response) => {
     const sqlAdv1= "SELECT COUNT(GameId) AS gameCount, requiredAge FROM (SELECT * FROM GamePurchasing WHERE isFree = 'false') nonFree NATURAL JOIN Genres NATURAL JOIN GeneralGameDescrip WHERE GenreIsAction = 'true' AND PriceFinal > 0 GROUP BY requiredAge ORDER BY requiredAge"
     db.query(sqlAdv1, (err, result) => { 
