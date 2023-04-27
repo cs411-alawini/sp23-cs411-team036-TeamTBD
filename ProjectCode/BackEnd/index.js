@@ -28,7 +28,7 @@ app.get("/api/getFilter", (req, res) => {
 });
 
 app.get("/api/get1", (require, response) => {
-    const sqlAdv1= "SELECT COUNT(GameId) AS gameCount, requiredAge FROM (SELECT * FROM GamePurchasing WHERE isFree = 'false') nonFree NATURAL JOIN Genres NATURAL JOIN GeneralGameDescrip WHERE GenreIsAction = 'true' AND PriceFinal > 0 GROUP BY requiredAge ORDER BY requiredAge"
+    const sqlAdv1= "SELECT COUNT(GameId) AS gameCount FROM (SELECT * FROM GamePurchasing WHERE isFree = 'false') nonFree NATURAL JOIN Genres NATURAL JOIN GeneralGameDescrip WHERE GenreIsAction = 'true' AND PriceFinal > 0 GROUP BY requiredAge ORDER BY requiredAge"
     db.query(sqlAdv1, (err, result) => { 
         response.send(result);
     });
@@ -49,7 +49,15 @@ app.get("/api/get", (req, res) => {
         console.log(result);
     });
 });
-
+//Get user age
+app.get("/api/getAge", (req, res) => {
+    const userId = req.query.userId
+    const sqlSelect = "SELECT userAge FROM Users WHERE UserId = ?";
+    db.query(sqlSelect, [userId], (err, result) => {
+        res.send(result);
+        console.log(result);
+    });
+});
 app.post("/api/insert", (req, res) => {
     const userId = req.body.userId;
     const gameId = req.body.gameId;
