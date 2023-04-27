@@ -15,15 +15,15 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 
+
 //filter
 app.get("/api/getFilter", (req, res) => {
     //const userId = req.body.userId
     //SQL written in front end
     const sqlSelect =  req.query.sqlToInsert;
-    console.log("test");
     db.query(sqlSelect, (err, result) => {
         res.send(result);
-        console.log("test");
+        console.log(result);
     });
 });
 
@@ -32,6 +32,7 @@ app.get("/api/get1", (require, response) => {
     db.query(sqlAdv1, (err, result) => { 
         response.send(result);
     });
+    
 });
 app.get("/api/get2", (require, response) => {
     const sqlAdv2= "SELECT GameName FROM GeneralGameDescrip NATURAL JOIN Categories NATURAL JOIN GamePurchasing WHERE CategorySinglePlayer='false' AND PriceFinal>0 AND PriceFinal<=(SELECT AVG(gp.PriceFinal) FROM GamePurchasing gp join Categories ct WHERE PriceFinal>0 AND ct.CategorySinglePlayer='false')"
@@ -45,7 +46,7 @@ app.get("/api/get", (req, res) => {
     const sqlSelect = "SELECT * FROM BannedGameTitle WHERE UserId = ?";
     db.query(sqlSelect, [userId], (err, result) => {
         res.send(result);
-        //console.log(result);
+        console.log(result);
     });
 });
 
