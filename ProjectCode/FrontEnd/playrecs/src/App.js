@@ -48,6 +48,7 @@ const[checked, setChecked]=useState(new Array(GenreCategories.length).fill(false
 const[sqlToInsert, setSqlToInsert] = useState('');
 const[filteredGameList, setFilteredGameList] = useState([]);
 const[searchText, setSearchText]=useState('');
+const[insertClicked,setInsertClicked]=useState(false);
 const SearchFilter = (sqlText) => {
   Axios.get('http://localhost:3002/api/getFilter/', {params: {sqlToInsert: sqlText}}).then((response) => {
     setFilteredGameList(response.data)
@@ -113,7 +114,12 @@ const handleOnChange = (position) => {
   );
   setChecked(updatedChecked);
 };
-
+useEffect(() => {
+  if(insertClicked===true) {
+    InsertTitles();
+    setInsertClicked(false);
+  }
+},[insertClicked]);
 useEffect(() => {
   Axios.get('http://localhost:3002/api/get1').then((response) => {
     setAdvQueryList1(response.data)
@@ -247,7 +253,7 @@ return (
               <input type="text" name="addedGameTitle" onChange={(e) => {
                 setAddedGameTitle(e.target.value)
               }}/>
-              <button onClick={InsertTitles}> Add Game </button>
+              <button onClick={setInsertClicked(true)}> Add Game </button>
 
               {/* the view to DELETE  */}
               <input type="text" name="deletedGameTitle" onChange={(e) => {
