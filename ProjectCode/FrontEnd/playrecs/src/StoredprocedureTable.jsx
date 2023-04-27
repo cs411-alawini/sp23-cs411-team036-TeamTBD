@@ -1,39 +1,72 @@
-import axios from "axios";
 import React, { useEffect, useState } from "react";
-import "./App.css"
+import axios from "axios";
+import { Bar } from "react-chartjs-2";
+import { Chart, registerables} from 'chart.js';
+Chart.register(...registerables);
 
-const StoreprocedureTable = () => {
+const StoreprocedureChart = () => {
+  const [chartData, setChartData] = useState(null);
+  const [gameIDs, setGameIDs] = useState(null);
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await axios.get("http://localhost:3002/api/storeprocedure");
 
-    const [spdata, setSpdata] = useState(null);
+      const labels = [];
+      const data = [];
 
-    useEffect(() => {
-        const getspdata = async () => {
-            const res = await axios.get("http://localhost:3002/api/storeprocedure");
-            setSpdata(res.data.sqldata[1]);
-        };
+      res.data.sqldata[1].forEach((row) => {
+        labels.push(row.requiredAge);
+        data.push(row.game_count);
+      });
 
-        getspdata();
-    }, []);
+      setChartData({
+        labels: labels,
+        datasets: [
+          {
+            label: "Game Count by Required Age",
+            data: data,
+            backgroundColor: "rgba(54, 162, 235, 0.5)",
+            borderColor: "rgba(54, 162, 235, 1)",
+            borderWidth: 1,
+          },
+        ],
+      });
+      setGameIDs(res.data.sqldata[0]);
+    };
 
-    
-    return (
-        <table>
-            <thead>
-                <tr>
-                    <th>Required Age</th>
-                    <th>Game Count</th>
-                </tr>
-            </thead>
-            <tbody>
-                {spdata?.map((r => (
-                    <tr>
-                        <td>{r.requiredAge}</td>
-                        <td>{r.game_count}</td>
-                    </tr>
-                )))}
-            </tbody>
-        </table>
-    );
+    fetchData();
+  }, []);
+
+  return (
+    <div>
+      {chartData && (
+        <Bar
+          data={chartData}
+          options={{
+            scales: {
+              y: {
+                beginAtZero: true,
+              },
+            },
+          }}
+        />
+      )}
+      <table>
+                    <thead>
+                        <tr>
+                            <th>Game IDs</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {gameIDs?.map((row) => (
+                        <tr key={row.game_id}>
+                            <td>{row.game_id}</td>
+                        </tr>
+                    ))}
+                    </tbody>
+                </table>
+    </div>
+  );
 };
 
-export default StoreprocedureTable;
+export default StoreprocedureChart;
