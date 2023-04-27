@@ -7,6 +7,7 @@ function App() {
 
 //useState() used to display banned game titles
 //login information 
+//login information 
 const [UserId, setUserId] = useState();                            //stores current UserId
 
 //userState() used to store data from updating profile
@@ -14,6 +15,7 @@ const [updateFN, setUpdateFN] = useState();                     //stores current
 const [updateLN, setUpdateLN] = useState();                     //stores current LastName
 const [updatePN, setUpdatePN] = useState();                     //stores current FirstName
 const [updateE, setUpdateE] = useState();                       //stores current LastName
+const [updateA, setUpdateA] = useState();                       //stores current LastName
 
 const [gameReviewList, setGameIdList] = useState([]);             //stores the data returned from the query in .get() function
 const [userData, setUserData] = useState([]);             //stores the data returned from the query in .get() function
@@ -33,11 +35,14 @@ const [advQueryList1, setAdvQueryList1] =useState([]);
 const [advQueryList2, setAdvQueryList2] =useState([]);
 
 //useState() used to display data after pressing buttons
+//useState() used to display data after pressing buttons
 const[showAdvQuery1, setShowAdvQuery1] = useState(false);
 const[showAdvQuery2, setShowAdvQuery2] = useState(false);
 const[showProfile, setShowProfile] = useState(false);
 const[showPlatform, setShowPlatform] = useState(false);
 
+const[userAge,setUserAge] = useState(0);
+// const[age,setAge] = useState(0);
 const numGenreCollections = 18;
 const GenreCategories = ["GenreIsIndie","GenreIsAction","GenreIsAdventure","GenreIsCasual",
 "GenreIsStrategy","GenreIsRPG","GenreIsSimulation","GenreIsEarlyAccess","GenreIsFreeToPlay",
@@ -88,6 +93,17 @@ const Search = () => {
       }
     }
   }
+  var agetext = JSON.stringify(userAge);
+  agetext = agetext.match(/\d+/);
+  // age = parseInt(agetext);
+  // setAge(age);
+  if(checked[19]===true){
+    if(sqlLine.length === 0) {
+      sqlLine+=agetext+">=RequiredAge";
+    } else {
+      sqlLine+=" AND "+agetext+">=RequiredAge";
+    }
+  }
   var sqlFinal = "SELECT GameName, GameId FROM GeneralGameDescrip NATURAL JOIN Categories NATURAL JOIN Genres WHERE ";
   if(sqlLine.length===0){
     sqlFinal="SELECT GameName, GameId FROM GeneralGameDescrip NATURAL JOIN Categories NATURAL JOIN Genres";
@@ -95,6 +111,11 @@ const Search = () => {
   sqlFinal+=sqlLine;
   setSqlToInsert(sqlFinal);
   SearchFilter(sqlFinal);
+}
+const getUserAge = () => {
+  Axios.get('http://localhost:3002/api/getAge/', {params: {userId: UserId}}).then((response) => {
+    setUserAge(response.data)
+  });
 }
 //when checked box
 const handleOnChange = (position) => {
@@ -118,6 +139,7 @@ useEffect(() => {
 const DisplayTitles = () => {
   Axios.get('http://localhost:3002/api/get/', {params: {userId: UserId}}).then((response) => {
     setGameIdList(response.data)
+    getUserAge()
   });
 }
 
@@ -127,21 +149,16 @@ const DisplayUserData = () => {
   });
 }
 
-const InsertTitles = () => {
+const InsertTitles = (gameId, UserId) => {
   Axios.post('http://localhost:3002/api/insert', {
   userId: UserId,
-  gameId: addedGameTitle
+  gameId: gameId
   }).then(DisplayTitles());
 }
 
 const deleteGameId = (gameId, userId) => {
   Axios.delete(`http://localhost:3002/api/delete/${gameId}/${userId}`).then(DisplayTitles());
-  Axios.delete(`http://localhost:3002/api/delete/${gameId}/${userId}`).then(DisplayTitles());
 };
-
-// const updateGameId = (gameId, newGameId, userId) => {
-//   Axios.put(`http://localhost:3002/api/update/${gameId}/${newGameId}/${userId}`).then(DisplayTitles());
-// };
 
 const userLogin = () => {
   Axios.get('http://localhost:3002/api/getUserData/', {params: {userId: UserId}}).then((response) => {
@@ -151,17 +168,24 @@ const userLogin = () => {
     Axios.post('http://localhost:3002/api/insertUser', {
       userId: UserId
     });
-    userData.map((val) => {
-      setUpdateFN(val.FirstName);
-      setUpdateLN(val.LastName);
-      setUpdatePN(val.PhoneNumber);
-      setUpdateE(val.EmailAddress);
-    })
     DisplayTitles()
+}
+
+const updateAll = () => {
+  userData.map((val) => {
+    setUpdateFN(val.FirstName);
+    setUpdateLN(val.LastName);
+    setUpdatePN(val.PhoneNumber);
+    setUpdateE(val.EmailAddress);
+  })
 }
 
 const updateUserInfo = (userId, FirstName, LastName, PhoneNumber, EmailAddress) => {
   Axios.put(`http://localhost:3002/api/updateUser/${userId}/${FirstName}/${LastName}/${PhoneNumber}/${EmailAddress}`).then(DisplayUserData());
+};
+
+const updateUsersAge = (userId, userAge) => {
+  Axios.put(`http://localhost:3002/api/updateUserAge/${userId}/${userAge}`);
 };
 
 return (
@@ -182,7 +206,7 @@ return (
         <div>
           <p> Welcome User: {UserId}</p>
           <p>Choose to Update Profile or Search for Games</p>
-          <button onClick = {() => {setShowProfile(!showProfile)}}> Update Profile</button>
+          <button onClick = {() => {updateAll(); setShowProfile(!showProfile)}}> Update Profile</button>
           {showProfile? 
           <div>
             <p>Updating Profile</p>
@@ -219,7 +243,14 @@ return (
             <input type="text" name="Email" onChange={(e) => {
               setUpdateE(e.target.value)
             }}/>
-            <button onClick={() => {updateUserInfo(UserId, updateFN, updateLN, updatePN, updateE)}}> Update </button>
+
+            {/* Text Field to store Email */}
+            <label> Age:</label>
+            <input type="text" name="Age" onChange={(e) => {
+              setUpdateA(e.target.value)
+            }}/>
+
+            <button onClick={() => {updateUserInfo(UserId, updateFN, updateLN, updatePN, updateE); updateUsersAge(UserId, updateA)}}> Update </button>
 
             {/* the view for displaying the "banned games" for typed user */}
             <div>
@@ -236,7 +267,7 @@ return (
               <input type="text" name="addedGameTitle" onChange={(e) => {
                 setAddedGameTitle(e.target.value)
               }}/>
-              <button onClick={InsertTitles}> Add Game </button>
+              <button onClick={() => {InsertTitles(addedGameTitle, UserId)}}> Add Game </button>
 
               {/* the view to DELETE  */}
               <input type="text" name="deletedGameTitle" onChange={(e) => {
@@ -248,40 +279,14 @@ return (
           </div>:null}
         </div>:null}
     </div>
-
-      <div>
-        <button onClick = {() => {setShowAdvQuery2(!showAdvQuery2)}}>   Multiplayer Games</button>
-        {showAdvQuery2? <div>
-          <p>Multiplayer games less than or equal to average price of all non-free multiplayer games:  </p>
-          {advQueryList2.map((val) => {
-          return (
-            <div className = "advQuery2">
-              <p>Game Name: {val.GameName}</p>
-            </div>
-          );          
-        })}</div>:null}
-        
-      </div>
-      <div>
-       <button onClick = {() => {setShowAdvQuery1(!showAdvQuery1)}}>   Non-free Action Games</button>
-       {showAdvQuery1? <div>
-        <p>Number of non-free Action Games based on Age:</p>
-        {advQueryList1.map((val) => {
-         return (
-           <div className = "advQuery1">
-             <p>Required Age: {val.requiredAge}</p>
-             <p>Count: {val.gameCount}</p>
-           </div>
-         );          
-       })}</div>:null}
-     </div>
   </div> 
 
   <div>
+    <h2> Search Games </h2>
     <input type="text" name="searchTextBox" onChange={(e) => {
           setSearchText(e.target.value)
     }}/>
-    <p>{searchText}</p>
+    {/* <p>{searchText}</p> */}
   </div>
   <div>
         {GenreCategories.map((name, index) => {
@@ -312,8 +317,35 @@ return (
    })}
     </div>   
         {/* <p>SQL: {sqlToInsert}</p>
-        <p>{JSON.stringify(filteredGameList)}</p> */}
+        <p>{JSON.stringify(filteredGameList)}</p> 
+        <p>user Age: {JSON.stringify(userAge)}</p>*/}
     </div>
+    <div>
+        <button onClick = {() => {setShowAdvQuery2(!showAdvQuery2)}}>   Multiplayer Games</button>
+        {showAdvQuery2? <div>
+          <p>Multiplayer games less than or equal to average price of all non-free multiplayer games:  </p>
+          {advQueryList2.map((val) => {
+          return (
+            <div className = "advQuery2">
+              <p>Game Name: {val.GameName}</p>
+            </div>
+          );          
+        })}</div>:null}
+        
+      </div>
+      <div>
+       <button onClick = {() => {setShowAdvQuery1(!showAdvQuery1)}}>   Non-free Action Games</button>
+       {showAdvQuery1? <div>
+        <p>Number of non-free Action Games based on Age:</p>
+        {advQueryList1.map((val) => {
+         return (
+           <div className = "advQuery1">
+             <p>Required Age: {val.requiredAge}</p>
+             <p>Count: {val.gameCount}</p>
+           </div>
+         );          
+       })}</div>:null}
+     </div>
     <div>
       <button onClick={toggleCode}>View Steam Game Statistics </button>
       {showCode && (
