@@ -42,7 +42,9 @@ const[showProfile, setShowProfile] = useState(false);
 const[showPlatform, setShowPlatform] = useState(false);
 
 const[userAge,setUserAge] = useState(0);
+
 // const[age,setAge] = useState(0);
+
 const numGenreCollections = 18;
 const GenreCategories = ["GenreIsIndie","GenreIsAction","GenreIsAdventure","GenreIsCasual",
 "GenreIsStrategy","GenreIsRPG","GenreIsSimulation","GenreIsEarlyAccess","GenreIsFreeToPlay",
@@ -95,8 +97,11 @@ const Search = () => {
   }
   var agetext = JSON.stringify(userAge);
   agetext = agetext.match(/\d+/);
+
   // age = parseInt(agetext);
   // setAge(age);
+  //age = parseInt(agetext);
+
   if(checked[19]===true){
     if(sqlLine.length === 0) {
       sqlLine+=agetext+">=RequiredAge";
@@ -206,7 +211,9 @@ return (
         <div>
           <p> Welcome User: {UserId}</p>
           <p>Choose to Update Profile or Search for Games</p>
+
           <button onClick = {() => {updateAll(); setShowProfile(!showProfile)}}> Update Profile</button>
+
           {showProfile? 
           <div>
             <p>Updating Profile</p>

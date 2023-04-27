@@ -9,13 +9,11 @@ var db = mysql.createConnection({
   user: "root",
   password: "test1234",
   database: "Game_Data",
-});
-  
+})
 
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
-
 
 //filter
 app.get("/api/getFilter", (req, res) => {
@@ -27,9 +25,17 @@ app.get("/api/getFilter", (req, res) => {
         console.log(result);
     });
 });
-
+//Get user age
+app.get("/api/getAge", (req, res) => {
+    const userId = req.query.userId
+    const sqlSelect = "SELECT userAge FROM Users WHERE UserId = ?";
+    db.query(sqlSelect, [userId], (err, result) => {
+        res.send(result);
+        console.log(result);
+    });
+});
 app.get("/api/get1", (require, response) => {
-    const sqlAdv1= "SELECT COUNT(GameId) AS gameCount, requiredAge FROM (SELECT * FROM GamePurchasing WHERE isFree = 'false') nonFree NATURAL JOIN Genres NATURAL JOIN GeneralGameDescrip WHERE GenreIsAction = 'true' AND PriceFinal > 0 GROUP BY requiredAge ORDER BY requiredAge"
+    const sqlAdv1= "SELECT COUNT(GameId) AS gameCount FROM (SELECT * FROM GamePurchasing WHERE isFree = 'false') nonFree NATURAL JOIN Genres NATURAL JOIN GeneralGameDescrip WHERE GenreIsAction = 'true' AND PriceFinal > 0 GROUP BY requiredAge ORDER BY requiredAge"
     db.query(sqlAdv1, (err, result) => { 
         response.send(result);
     });
@@ -54,6 +60,15 @@ app.get("/api/getUserData", (req, res) => {
 app.get("/api/get", (req, res) => {
     const userId = req.query.userId
     const sqlSelect = "SELECT * FROM BannedGameTitle WHERE UserId = ?";
+    db.query(sqlSelect, [userId], (err, result) => {
+        res.send(result);
+        console.log(result);
+    });
+});
+
+app.get("/api/getUserData", (req, res) => {
+    const userId = req.query.userId
+    const sqlSelect = "SELECT * FROM LoginUser WHERE UserId = ?";
     db.query(sqlSelect, [userId], (err, result) => {
         res.send(result);
         console.log(result);
@@ -129,6 +144,19 @@ app.put("/api/updateUser/:userId/:firstName/:lastName/:phoneNum/:email", (req, r
     const email = req.params.email
     const sqlUpdate = "UPDATE `LoginUser` SET `FirstName` = ?, `LastName` = ?, `PhoneNumber` = ?, `EmailAddress` = ? WHERE `UserId` = ?;";
     db.query(sqlUpdate, [firstName, lastName, phoneNum, email, userId], (err, result) => {
+        if (err) {
+            console.log(err);
+        } else {
+            console.log("1 record updated");
+        }
+    })
+});
+
+app.put("/api/updateUserAge/:userId/:useAge", (req, res) => {
+    const userId = req.params.userId
+    const userAge = req.params.useAge
+    const sqlUpdate = "UPDATE `Users` SET `userAge` = ? WHERE `UserId` = ?;";
+    db.query(sqlUpdate, [userAge, userId], (err, result) => {
         if (err) {
             console.log(err);
         } else {
