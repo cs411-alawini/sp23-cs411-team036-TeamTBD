@@ -34,8 +34,8 @@ const[checked, setChecked]=useState(new Array(GenreCategories.length).fill(false
 const[sqlToInsert, setSqlToInsert] = useState('');
 const[filteredGameList, setFilteredGameList] = useState([]);
 const[searchText, setSearchText]=useState('');
-const SearchFilter = () => {
-  Axios.get('http://localhost:3002/api/getFilter/', {params: {sqlToInsert: sqlToInsert}}).then((response) => {
+const SearchFilter = (sqlText) => {
+  Axios.get('http://localhost:3002/api/getFilter/', {params: {sqlToInsert: sqlText}}).then((response) => {
     setFilteredGameList(response.data)
   });
 }
@@ -59,24 +59,23 @@ const Search = () => {
   } else {
     sqlLine+=" AND "+"GameName LIKE '%"+searchText+"%'";
   }
- //banned game list
- if(checked[18]===true){
-
-  for(var i = 0; i < gameReviewList.length; i++) {
-    if(sqlLine.length === 0) {
-      sqlLine+="GameId <>" +gameReviewList[i].GameId;
-    } else {
-      sqlLine+=" AND GameId <>"+gameReviewList[i].GameId;
+  //banned game list
+  if(checked[18]===true){
+    for(var i = 0; i < gameReviewList.length; i++) {
+      if(sqlLine.length === 0) {
+        sqlLine+="GameId <>" +gameReviewList[i].GameId;
+      } else {
+        sqlLine+=" AND GameId <>"+gameReviewList[i].GameId;
+      }
     }
   }
-}
   var sqlFinal = "SELECT GameName, GameId FROM GeneralGameDescrip NATURAL JOIN Categories NATURAL JOIN Genres WHERE ";
   if(sqlLine.length===0){
     sqlFinal="SELECT GameName, GameId FROM GeneralGameDescrip NATURAL JOIN Categories NATURAL JOIN Genres";
   }
   sqlFinal+=sqlLine;
   setSqlToInsert(sqlFinal);
-  SearchFilter();
+  SearchFilter(sqlFinal);
 }
 //when checked box
 const handleOnChange = (position) => {
